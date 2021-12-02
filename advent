@@ -1,0 +1,127 @@
+#!/usr/bin/env ruby
+
+require 'httparty'
+require 'fileutils'
+require 'inquirer'
+
+#  usage
+#
+#> ruby advent.rb {day} {year} {file}
+#
+@session_cookie = ENV['ADVENT_SESSION'] || raise("No ADVENT_SESSION in your ENV")
+@cookie_hash = HTTParty::CookieHash.new
+@cookie_hash.add_cookies("session" => @session_cookie)
+
+def solving?
+  ARGV[0] == 'solve' || ARGV[0] == 's'
+end
+
+def get_puzzle
+  url="https://adventofcode.com/#{@year}/day/#{@day}"
+  
+  full_puzzle = HTTParty.get(url, headers: {'Cookie' => @cookie_hash.to_cookie_string })
+
+  FileUtils.mkdir_p("#{@year}/#{@day}")
+  File.open("./#{@year}/#{@day}/puzzle.html", 'w') { |f| f.write(full_puzzle.split('<article class="day-desc">')[1].split("</article>")[0])}
+  puts "Puzzle Part 1 Copied to: #{@year}/#{@day}/puzzle.html"
+  if full_puzzle.split('<article class="day-desc">').length > 2
+    File.open("./#{@year}/#{@day}/puzzle.html", 'a') { |f| f.write(full_puzzle.split('<article class="day-desc">')[2].split("</article>")[0])}
+    puts "Puzzle Part 2 Appended to: #{@year}/#{@day}/puzzle.html"
+  end
+  cmd = "code #{@year}/#{@day}/puzzle.html"
+  %x[ #{cmd} ]
+end
+
+def get_input
+  url="https://adventofcode.com/#{@year}/day/#{@day}/input"
+
+  FileUtils.mkdir_p("#{@year}/#{@day}")
+  File.open("./#{@year}/#{@day}/#{@file}", 'w') { |f| f.write(HTTParty.get(url, headers: {'Cookie' => @cookie_hash.to_cookie_string }).chomp)}
+  puts "Input Copied to: #{@year}/#{@day}/#{@file}"
+  cmd = "code #{@year}/#{@day}/#{@file}"
+  %x[ #{cmd} ]
+end
+
+def make_solution_file
+  FileUtils.mkdir_p("#{@year}/#{@day}")
+  unless File.exist?("./#{@year}/#{@day}/solution.rb")
+    File.open("./#{@year}/#{@day}/solution.rb", 'w') { |f| f.write("lines = File.readlines(\"#{@file}\")\n\nputs lines\n\nans=0\n\nputs ans") }
+    puts "Created solution file: #{@year}/#{@day}/solution.rb"
+  else
+    puts "Found solution file: #{@year}/#{@day}/solution.rb"
+  end
+  cmd = "code #{@year}/#{@day}/solution.rb"
+  %x[ #{cmd} ]
+end
+
+def solve_code
+  @puzzle ||= Ask.input "Part 1 or 2?", default: 1
+  
+  url="https://adventofcode.com/#{@year}/day/#{@day}/answer"
+
+  response = HTTParty.post(url, headers: {'Cookie' => @cookie_hash.to_cookie_string }, body: {level: @puzzle, answer: @answer})
+
+  
+  feedback = response.body.split("<article>")[1].split("</article>")[0]
+  success = feedback.match("<span class=\"day-success\">")
+  feedback = feedback.gsub("<span class=\"day-success\">", "\e[33m")
+  feedback = feedback.gsub("</span>",  "\e[0m")
+  puts "Response Code: #{response.code}"
+  puts feedback
+
+  puts @day
+  puts @year
+  puts @answer
+
+  if @puzzle == 1
+    get_puzzle
+  end
+  success
+end
+
+def too_early
+  @year == Time.now.year.to_s && (Time.now.month.to_s != 12 || (Time.now+2*60*60).day.to_s < @day)
+  false
+end
+
+arg_offset = solving? ? 1 : 0
+if ARGV[arg_offset] == '-d'
+  @day = (Time.now+2*60*60).day.to_s
+  @year = Time.now.year.to_s
+  @file = "input"
+  @answer = ARGV[arg_offset + 1] || 0
+else
+  @day = ARGV[arg_offset] || Ask.input("What day?", default: (Time.now+2*60*60).day.to_s)
+  @year = ARGV[arg_offset + 1] || Ask.input("What year?", default: Time.now.year.to_s)
+  @file = @answer = ARGV[arg_offset + 2] || Ask.input("Input file name?", default: "input")
+end
+
+if solving?
+  while !solve_code
+    @answer = Ask.input("That was wrong, answer?")
+  end
+  if @puzzle == 1
+    @puzzle = 2
+    @answer = Ask.input("Part 2 answer?")
+    while !solve_code
+      @answer = Ask.input("That was wrong, answer?")
+    end
+  end
+else
+  make_solution_file
+  get_puzzle if !too_early
+  get_input if !too_early
+  if !too_early
+    @answer = Ask.input("answer?")
+    while !solve_code
+      @answer = Ask.input("That was wrong, answer?")
+    end
+    if @puzzle == 1
+      @puzzle = 2
+      @answer = Ask.input("Part 2 answer?")
+      while !solve_code
+        @answer = Ask.input("That was wrong, answer?")
+      end
+    end
+  end
+end
