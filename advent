@@ -45,7 +45,7 @@ end
 def make_solution_file
   FileUtils.mkdir_p("#{@year}/#{@day}")
   unless File.exist?("./#{@year}/#{@day}/solution.rb")
-    File.open("./#{@year}/#{@day}/solution.rb", 'w') { |f| f.write("lines = File.readlines(\"#{@file}\")\n\nputs lines\n\nans=0\n\nputs ans") }
+    File.open("./#{@year}/#{@day}/solution.rb", 'w') { |f| f.write("lines = IO.readlines(\"#{@file}\")\n\nputs lines\n\nans=0\n\nputs ans") }
     puts "Created solution file: #{@year}/#{@day}/solution.rb"
   else
     puts "Found solution file: #{@year}/#{@day}/solution.rb"
