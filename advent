@@ -25,6 +25,7 @@ def get_puzzle
   File.open("./#{@year}/#{@day}/puzzle.html", 'w') { |f| f.write(full_puzzle.split('<article class="day-desc">')[1].split("</article>")[0])}
   puts "Puzzle Part 1 Copied to: #{@year}/#{@day}/puzzle.html"
   if full_puzzle.split('<article class="day-desc">').length > 2
+    @puzzle = 2
     File.open("./#{@year}/#{@day}/puzzle.html", 'a') { |f| f.write(full_puzzle.split('<article class="day-desc">')[2].split("</article>")[0])}
     puts "Puzzle Part 2 Appended to: #{@year}/#{@day}/puzzle.html"
   end
@@ -55,7 +56,7 @@ def make_solution_file
 end
 
 def solve_code
-  @puzzle ||= Ask.input "Part 1 or 2?", default: 1
+  @puzzle ||= 1
   
   url="https://adventofcode.com/#{@year}/day/#{@day}/answer"
 
@@ -75,6 +76,12 @@ def solve_code
 
   if @puzzle == 1
     get_puzzle
+  end
+  if success && @puzzle == 2
+    # Get ranks
+    rank_url = "https://adventofcode.com/#{@year}/leaderboard/self"
+    rank_resp = HTTParty.get(rank_url, headers: {'Cookie' => @cookie_hash.to_cookie_string })
+    puts rank_resp.body.split("<pre>")[1].split("</pre>")[0]
   end
   success
 end
@@ -112,12 +119,16 @@ else
   get_puzzle if !too_early
   get_input if !too_early
   if !too_early
-    @answer = Ask.input("answer?")
-    while !solve_code
-      @answer = Ask.input("That was wrong, answer?")
-    end
-    if @puzzle == 1
-      @puzzle = 2
+    if @puzzle != 2
+      @answer = Ask.input("answer?")
+      while !solve_code
+        @answer = Ask.input("That was wrong, answer?")
+      end
+      @answer = Ask.input("Part 2 answer?")
+      while !solve_code
+        @answer = Ask.input("That was wrong, answer?")
+      end
+    else
       @answer = Ask.input("Part 2 answer?")
       while !solve_code
         @answer = Ask.input("That was wrong, answer?")
