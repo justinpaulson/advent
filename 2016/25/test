@@ -1,0 +1,4 @@
+cpy 1 a
+out a
+cpy 2 a
+out a

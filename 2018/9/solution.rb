@@ -1,45 +1,39 @@
-players = 473
+ARGV[0] ||= "input"
 
-last_marble = 70904
+input = File.read(ARGV[0]).chomp
+players = input.split(" ")[0].to_i
+last_marble = input.split(" ")[6].to_i
 
-ans=0
+players = Array.new(players, 0)
+marbles = []
 
-puts ans
+turn = 0
+0.upto(last_marble).each do |marble|
+  if marble % 23 == 0 && marble != 0
+    players[turn] += marble
+    marbles.rotate!(-7)
+    players[turn] += marbles.shift
+  else
+    marbles.rotate!(2)
+    marbles.unshift(marble)
+  end
+  turn = (turn + 1) % players.length
+end
 
-puts [
-"Chris Waters",
-"Alex Urbano",
-"Frank Sun",
-"Gabrielle DeWitt",
-"Jordon Biondo",
-"José Guerrero",
-"Jess von Euw",
-"Moustafa Aly",
-"Michael Shiel",
-"Nicolás Arias-Gonzalez",
-"Oscar Rendon",
-"Percy Hanna",
-"Steve Lamotte",
-"Sunil Davé",
-"Will Lawrence",
-"Andrew Jones",
-"Alex Bartlow",
-"Andrew Vit",
-"Chris Zempel",
-"John Bohn",
-"Jonathan Steel",
-"Justin Weiss",
-"Jeremy Wells",
-"Karina Li",
-"Maeve Revels",
-"Matthew Williams",
-"Nathan Wright",
-"Nicolás Hock Isaza",
-"Phil Wilt",
-"Shane Tully",
-"Vitaliy Dolbilov",
-"Yuko Takegoshi",
-"Kyle d'Oliveira",
-"Omar Collins",
-"Toray Altas"
-].shuffle.shuffle.shuffle.shuffle
+puts players.max
+
+# Slooooooooow
+(last_marble+1).upto(last_marble*100).each do |marble|
+  if marble % 23 == 0 && marble != 0
+    players[turn] += marble
+    marbles.rotate!(-7)
+    players[turn] += marbles.shift
+  else
+    marbles.rotate!(2)
+    marbles.unshift(marble)
+  end
+  turn = (turn + 1) % players.length
+  puts marble if marble % 100000 == 0 # 7090400
+end
+
+puts players.max

@@ -18,7 +18,7 @@ end
 
 def get_puzzle
   url="https://adventofcode.com/#{@year}/day/#{@day}"
-  
+
   full_puzzle = HTTParty.get(url, headers: {'Cookie' => @cookie_hash.to_cookie_string })
 
   FileUtils.mkdir_p("#{@year}/#{@day}")
@@ -46,7 +46,7 @@ end
 def make_solution_file
   FileUtils.mkdir_p("#{@year}/#{@day}")
   unless File.exist?("./#{@year}/#{@day}/solution.rb")
-    File.open("./#{@year}/#{@day}/solution.rb", 'w') { |f| f.write("lines = IO.readlines(\"#{@file}\")\n\nputs lines\n\nans=0\n\nputs ans") }
+    File.open("./#{@year}/#{@day}/solution.rb", 'w') { |f| f.write("require '../../grid.rb'\nARGV[0] ||= \"input\"\nlines = IO.readlines(ARGV[0]).map(&:chomp)\ngrid = new_grid lines.length, lines[0].length\nlines.each_with_index do |line, y|\n  line.chars.each_with_index do |char, x|\n    grid[y][x] = char\n  end\nend\n\nprint_grid grid\nputs lines\n") }
     puts "Created solution file: #{@year}/#{@day}/solution.rb"
   else
     puts "Found solution file: #{@year}/#{@day}/solution.rb"
@@ -57,12 +57,12 @@ end
 
 def solve_code
   @puzzle ||= 1
-  
+
   url="https://adventofcode.com/#{@year}/day/#{@day}/answer"
 
   response = HTTParty.post(url, headers: {'Cookie' => @cookie_hash.to_cookie_string }, body: {level: @puzzle, answer: @answer})
 
-  
+
   feedback = response.body.split("<article>")[1].split("</article>")[0]
   success = feedback.match("<span class=\"day-success\">")
   feedback = feedback.gsub("<span class=\"day-success\">", "\e[33m")

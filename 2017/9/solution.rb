@@ -1,8 +1,26 @@
-s = File.read("input").chomp.gsub(/!.{1}/,"").gsub(/<[^>]*>/,"").gsub(/{(.*)}/, '\1')
+ARGV[0] ||= "input"
 
-puts s.gsub("{}", "1")
-puts s.gsub("{}", "1").gsub("{1}", "3")
-# .gsub(/{,*}/,"1").gsub(/{([1,]*)}/,'2,\1').gsub(/{([1-2,]*)}/,'3,\1').gsub(/{([1-3,]*)}/,'4,\1').gsub(/{([1-4,]*)}/,'5,\1').gsub(/{([1-5,]*)}/,'6,\1').gsub(/{([1-6,]*)}/,'7,\1').gsub(/{([1-7,]*)}/,'8,\1').gsub(/{([1-8,]*)}/,'9,\1').gsub(/{([0-9,]*)}/,'10,\1').gsub(/{([0-9,]*)}/,'11,\1').gsub(/{([0-9,]*)}/,'12,\1').gsub(/{([0-9,]*)}/,'13,\1').gsub(/{([0-9,]*)}/,'14,\1').split(",").map(&:to_i).sum
+s = File.read(ARGV[0]).chomp.gsub(/!.{1}/,"").gsub(/<[^>]*>/,"")
 
-#1605 too low
-#3816 too low
+level = 1
+cursor = 0
+char = s[cursor]
+total = 0
+while level > 0 && cursor < s.length - 1
+  cursor += 1
+  char = s[cursor]
+  if char == "{"
+    level += 1
+  elsif char == "}"
+    total += level
+    level -= 1
+  end
+end
+
+puts total
+
+s = File.read(ARGV[0]).chomp.gsub(/!.{1}/,"")
+
+part_2 = s.scan(/<[^>]*>/).map{|x| x.length - 2}.reduce(:+)
+
+puts part_2

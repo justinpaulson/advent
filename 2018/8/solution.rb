@@ -1,90 +1,35 @@
-class Node
-  attr_accessor :nodes, :entries
+ARGV[0] ||= "input"
 
-  def initialize(nodes=[],entries=[])
-    @nodes = nodes
-    @entries = entries
-  end
+lines = IO.read(ARGV[0]).split.map(&:to_i)
 
-  def node_array
-    [@nodes.count, @entries.count] + @nodes.map(&:node_array) + @entries
-  end
-
-end
-
-lines = IO.read("test").split.map(&:to_i)
-
-nodes = []
-
-def get_child_nodes(nodes, lines, children)
-  child_nodes = []
-  puts lines.to_s
-  0.upto(children-01).map do |i|
-    p child_nodes.map{|n| n.node_array.count}.sum
-    lines = lines[child_nodes[i-1].node_array.count..-1] if i > 0
-    puts lines.to_s
-    child_count = lines[0]
-    metadata_count = lines[1]
-    if child_count == 0
-      node = Node.new([],lines[2..metadata_count+1])
-      nodes << node
-      child_nodes << node
-      lines = lines[2+metadata_count..-1]
-      node
-    else
-      puts lines.to_s
-      node = Node.new(get_child_nodes(nodes, lines[2..-1], child_count))
-      lines = lines[node.node_array.length-1..-1]
-      node.entries = lines[-metadata_count..-1]
-      nodes << node
-      child_nodes << node
-      node
+def get_metadata child_count, meta_count, lines
+  if child_count == 0
+    return lines[0..meta_count-1], lines[meta_count..-1]
+  else
+    meta = []
+    child_count.times do
+      child_meta, lines = get_metadata(lines[0], lines[1], lines[2..-1])
+      meta += child_meta
     end
+    return meta + lines[0..meta_count-1], lines[meta_count..-1]
   end
 end
 
-while lines.length > 0
-  child_count = lines[0]
-  metadata_count = lines[1]
-  metadata = lines[-metadata_count..-1]
-  puts lines[2..-metadata_count-1].to_s
-  nodes << Node.new(get_child_nodes(nodes, lines[2..-metadata_count-1], child_count))
+puts get_metadata(lines[0], lines[1], lines[2..-1])[0].sum
+
+lines = IO.read(ARGV[0]).split.map(&:to_i)
+
+def get_value child_count, meta_count, lines
+  if child_count == 0
+    return lines[0..meta_count-1].sum, lines[meta_count..-1]
+  else
+    meta = []
+    child_count.times do
+      child_meta, lines = get_value(lines[0], lines[1], lines[2..-1])
+      meta << child_meta
+    end
+    return lines[0..meta_count-1].sum{|a| (1 <= a && a < meta.length + 1) ? meta[a-1] : 0} , lines[meta_count..-1]
+  end
 end
-puts lines.to_s
 
-# ans=0
-
-# puts ans
-
-
-# # 2 3 1 3 1 1 0 1 99 2 10 11 12 0 1 5 1 1 2
-# # A----------------------------------------
-# #     B------------------------ E----
-# #         C-----------
-# #             D-----
-
-# lines = 1 3 1 1 0 1 99 2 10 11 12 0 1 5 1
-# children = 2
-# i = 1
-# child_count = 1
-# metadata_count = 3
-# node = 
-#   lines = 1 1 0 1 99 2 10 11 12 0 1 5 1
-#   children = 1
-#   i = 1
-#   child_count = 1
-#   metadata_count = 1
-#   node.children =
-#     lines = 0 1 99 2 10 11 12 0 1 5 1
-#     children = 1
-#     i = 1
-#     child_count = 0
-#     metadata_count = 1
-#     node.children = []
-#     node.meta = [99]
-#   node.meta = 
-
-# # 2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2
-# # A----------------------------------
-# #     B----------- C-----------
-# #                      D-----
+puts get_value(lines[0], lines[1], lines[2..-1])[0]
