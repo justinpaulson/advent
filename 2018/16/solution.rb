@@ -3,7 +3,6 @@ ARGV[0] ||= "input"
 file = IO.read(ARGV[0])
 tests, code = file.split("\n\n\n\n")
 code = code.split("\n").map(&:chomp).map{|l| l.split(" ").map(&:to_i)}
-puts code.to_s
 
 tests = tests.split("\n\n").map do |test|
   before, instruction, after = test.split("\n")
@@ -43,7 +42,7 @@ def addi(registers, a, b, c)
 end
 
 def mulr(registers, a, b, c)
-  registers[c] = registers[a] * registers[c]
+  registers[c] = registers[a] * registers[b]
   registers
 end
 
@@ -112,28 +111,42 @@ def eqrr(registers, a, b, c)
   registers
 end
 
+total_three_or_more = 0
+
 tests.each do |test|
   before, after, instruction = test
   opcode, a, b, c = instruction
+  total = 0
   possible_opcodes.keys.each do |test_code|
     result = send(test_code, before.dup, a, b, c)
     if result == after
+      total += 1
       possible_opcodes[test_code] << opcode unless possible_opcodes[test_code].include?(opcode)
     else
       possible_opcodes[test_code] -= [opcode]
     end
   end
+  total_three_or_more += 1 if total >= 3
 end
 
-while(possible_opcodes.values.map(&:length) != Set.new([1]*16))
+puts total_three_or_more
+
+
+while(possible_opcodes.values.map(&:length).any?{|l| l > 1})
   possible_opcodes.select{|k,v| v.length == 1}.each do |k,v|
-    puts "Found length 1 for #{k}"
     possible_opcodes.each do |k2,v2|
       next if k == k2
-      puts "Removing #{v.to_a[0]} from #{k2}"
       v2.delete(v[0])
     end
   end
-  puts possible_opcodes.to_s
-  key_wait
 end
+
+opcodes = possible_opcodes.map{|k,v| [k, v[0]]}.to_h
+
+registers = [0, 0, 0, 0]
+code.each do |instruction|
+  opcode, a, b, c = instruction
+  registers = send(opcodes.key(opcode), registers, a, b, c)
+end
+
+puts registers[0]
