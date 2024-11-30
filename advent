@@ -2,7 +2,7 @@
 
 require 'httparty'
 require 'fileutils'
-require 'inquirer'
+require 'cli/ui'
 
 #  usage
 #
@@ -11,6 +11,8 @@ require 'inquirer'
 @session_cookie = ENV['ADVENT_SESSION'] || raise("No ADVENT_SESSION in your ENV")
 @cookie_hash = HTTParty::CookieHash.new
 @cookie_hash.add_cookies("session" => @session_cookie)
+
+CLI::UI::StdoutRouter.enable
 
 def solving?
   ARGV[0] == 'solve' || ARGV[0] == 's'
@@ -98,20 +100,20 @@ if ARGV[arg_offset] == '-d'
   @file = "input"
   @answer = ARGV[arg_offset + 1] || 0
 else
-  @day = ARGV[arg_offset] || Ask.input("What day?", default: (Time.now+2*60*60).day.to_s)
-  @year = ARGV[arg_offset + 1] || Ask.input("What year?", default: Time.now.year.to_s)
-  @file = @answer = ARGV[arg_offset + 2] || Ask.input("Input file name?", default: "input")
+  @day = ARGV[arg_offset] || CLI::UI.ask("What day?", default: (Time.now+2*60*60).day.to_s)
+  @year = ARGV[arg_offset + 1] || CLI::UI.ask("What year?", default: Time.now.year.to_s)
+  @file = @answer = ARGV[arg_offset + 2] || CLI::UI.ask("Input file name?", default: "input")
 end
 
 if solving?
   while !solve_code
-    @answer = Ask.input("That was wrong, answer?")
+    @answer = CLI::UI.ask("That was wrong, answer?")
   end
   if @puzzle == 1
     @puzzle = 2
-    @answer = Ask.input("Part 2 answer?")
+    @answer = CLI::UI.ask("Part 2 answer?")
     while !solve_code
-      @answer = Ask.input("That was wrong, answer?")
+      @answer = CLI::UI.ask("That was wrong, answer?")
     end
   end
 else
@@ -120,18 +122,18 @@ else
   get_input if !too_early
   if !too_early
     if @puzzle != 2
-      @answer = Ask.input("answer?")
+      @answer = CLI::UI.ask("answer?")
       while !solve_code
-        @answer = Ask.input("That was wrong, answer?")
+        @answer = CLI::UI.ask("That was wrong, answer?")
       end
-      @answer = Ask.input("Part 2 answer?")
+      @answer = CLI::UI.ask("Part 2 answer?")
       while !solve_code
-        @answer = Ask.input("That was wrong, answer?")
+        @answer = CLI::UI.ask("That was wrong, answer?")
       end
     else
-      @answer = Ask.input("Part 2 answer?")
+      @answer = CLI::UI.ask("Part 2 answer?")
       while !solve_code
-        @answer = Ask.input("That was wrong, answer?")
+        @answer = CLI::UI.ask("That was wrong, answer?")
       end
     end
   end
