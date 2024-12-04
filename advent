@@ -23,6 +23,13 @@ def get_puzzle
 
   full_puzzle = HTTParty.get(url, headers: {'Cookie' => @cookie_hash.to_cookie_string })
 
+  answers = []
+  full_puzzle.scan(/Your puzzle answer was <code>(\d+)</).each_with_index do |match, i|
+    answers << match[0]
+    puts "Answer #{i+1}: #{match[0]}"
+  end
+  @finished = true if answers.length == 2
+
   FileUtils.mkdir_p("#{@year}/#{@day}")
   File.open("./#{@year}/#{@day}/puzzle.html", 'w') { |f| f.write(full_puzzle.split('<article class="day-desc">')[1].split("</article>")[0])}
   puts "Puzzle Part 1 Copied to: #{@year}/#{@day}/puzzle.html"
@@ -48,7 +55,7 @@ end
 def make_solution_file
   FileUtils.mkdir_p("#{@year}/#{@day}")
   unless File.exist?("./#{@year}/#{@day}/solution.rb")
-    File.open("./#{@year}/#{@day}/solution.rb", 'w') { |f| f.write("require '../../grid.rb'\nARGV[0] ||= \"input\"\nlines = IO.readlines(ARGV[0]).map(&:chomp)\ngrid = new_grid lines.length, lines[0].length\nlines.each_with_index do |line, y|\n  line.chars.each_with_index do |char, x|\n    grid[y][x] = char\n  end\nend\n\nprint_grid grid\nputs lines\n") }
+    File.open("./#{@year}/#{@day}/solution.rb", 'w') { |f| f.write("require '../../grid.rb'\nARGV[0] ||= \"input\"\nlines = IO.readlines(ARGV[0]).map(&:chomp)\ng = Grid.new(lines)\n\ng.print_grid\nputs lines\n") }
     puts "Created solution file: #{@year}/#{@day}/solution.rb"
   else
     puts "Found solution file: #{@year}/#{@day}/solution.rb"
@@ -130,7 +137,7 @@ else
       while !solve_code
         @answer = CLI::UI.ask("That was wrong, answer?")
       end
-    else
+    elsif !@finished
       @answer = CLI::UI.ask("Part 2 answer?")
       while !solve_code
         @answer = CLI::UI.ask("That was wrong, answer?")

@@ -16,20 +16,20 @@ end
 class Grid
   attr_accessor :grid
 
-  def initialize y, x, fill="."
-    @grid = Array.new(y) { Array.new(x) { fill } }
-  end
-
-  def initialize lines
-    @grid = Array.new(lines.length) { Array.new(lines[0].length) }
-    lines.each_with_index do |line, y|
-      line.chars.each_with_index do |char, x|
-        @grid[y][x] = char
+  def initialize y, x=nil, fill="."
+    if x
+      @grid = Array.new(y) { Array.new(x) { fill } }
+    else
+      @grid = Array.new(y.length) { Array.new(y[0].length) }
+      y.each_with_index do |line, y_pos|
+        line.chars.each_with_index do |char, x_pos|
+          @grid[y_pos][x_pos] = char
+        end
       end
     end
   end
 
-  def print joiner:"", highlight_cursor:nil, clear:true, wait:false
+  def print_grid joiner:"", highlight_cursor:nil, clear:true, wait:false
     total = @grid.length.to_s.length
     puts `clear` if clear
     0.upto(@grid.length-1) do |y|
