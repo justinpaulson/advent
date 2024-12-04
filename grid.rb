@@ -8,37 +8,71 @@ class Array
   end
 end
 
-def print_grid grid, joiner="", highlight_cursor=nil, clear=true, wait=false
-  total = grid.length.to_s.length
-  puts `clear` if clear
-  0.upto(grid.length-1) do |y|
-    print " " * (total - y.to_s.length) + y.to_s
-    print " "
-    if highlight_cursor && highlight_cursor[0] == y
-      print grid[y][0..(highlight_cursor[1]-1)].join(joiner) + "," unless highlight_cursor[1] == 0
-      print "\e[33m#{grid[y][highlight_cursor[1]]}\e[0m"
-      puts ","+grid[y][highlight_cursor[1]+1..-1].join(joiner) unless highlight_cursor[1] == grid[y].length - 1
-    else
-      puts grid[y].join(joiner)
-    end
-  end
-  key_wait if wait
-end
-
 def key_wait
   p "press any key"
   STDIN.getch
 end
 
-def new_grid y, x, fill="."
-  Array.new(y) { Array.new(x) { fill } }
-end
+class Grid
+  attr_accessor :grid
 
-def rotate_grid grid, direction="cw"
-  if direction == "cw"
-    grid.transpose.map(&:reverse)
-  elsif direction == "ccw"
-    grid.transpose.reverse
+  def initialize y, x, fill="."
+    @grid = Array.new(y) { Array.new(x) { fill } }
+  end
+
+  def initialize lines
+    @grid = Array.new(lines.length) { Array.new(lines[0].length) }
+    lines.each_with_index do |line, y|
+      line.chars.each_with_index do |char, x|
+        @grid[y][x] = char
+      end
+    end
+  end
+
+  def print joiner:"", highlight_cursor:nil, clear:true, wait:false
+    total = @grid.length.to_s.length
+    puts `clear` if clear
+    0.upto(@grid.length-1) do |y|
+      print " " * (total - y.to_s.length) + y.to_s
+      print " "
+      if highlight_cursor && highlight_cursor[0] == y
+        print @grid[y][0..(highlight_cursor[1]-1)].join(joiner) + "," unless highlight_cursor[1] == 0
+        print "\e[33m#{@grid[y][highlight_cursor[1]]}\e[0m"
+        puts ","+@grid[y][highlight_cursor[1]+1..-1].join(joiner) unless highlight_cursor[1] == @grid[y].length - 1
+      else
+        puts @grid[y].join(joiner)
+      end
+    end
+    key_wait if wait
+  end
+
+  def rotate direction="cw"
+    if direction == "cw"
+      @grid.transpose.map(&:reverse)
+    elsif direction == "ccw"
+      @grid.transpose.reverse
+    end
+  end
+
+  def rotate! direction="cw"
+    @grid = rotate direction
+  end
+
+  def flip direction="h"
+    if direction == "h"
+      @grid.map(&:reverse)
+    elsif direction == "v"
+      @grid.reverse
+    end
+  end
+
+  def flip! direction="h"
+    @grid = flip direction
+  end
+
+  def key_wait
+    p "press any key"
+    STDIN.getch
   end
 end
 
