@@ -1,6 +1,13 @@
 require 'io/console'
 require 'set'
 
+class Array
+  def ave
+    return nil if empty? # Handle empty array case
+    sum.to_f / size
+  end
+end
+
 def print_grid grid, joiner="", highlight_cursor=nil, clear=true, wait=false
   total = grid.length.to_s.length
   puts `clear` if clear
