@@ -22,8 +22,14 @@ class Grid
     else
       @grid = Array.new(y.length) { Array.new(y[0].length) }
       y.each_with_index do |line, y_pos|
-        line.chars.each_with_index do |char, x_pos|
-          @grid[y_pos][x_pos] = char
+        if line.is_a? String
+          line.chars.each_with_index do |char, x_pos|
+            @grid[y_pos][x_pos] = char
+          end
+        else
+          line.each_with_index do |val, x_pos|
+            @grid[y_pos][x_pos] = val
+          end
         end
       end
     end
@@ -68,6 +74,17 @@ class Grid
 
   def flip! direction="h"
     @grid = flip direction
+  end
+
+  def find val
+    grid.each_with_index do |line, y|
+      line.each_with_index do |char, x|
+        if char == val
+          return [y,x]
+        end
+      end
+    end
+    nil
   end
 
   def key_wait
