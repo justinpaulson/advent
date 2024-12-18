@@ -87,6 +87,18 @@ class Grid
     nil
   end
 
+  def find_adjacent point, val
+    points = []
+    y,x = point
+    [[y+1,x],[y-1,x],[y,x+1],[y,x-1]].each do |new_point|
+      y,x = new_point
+      if y >= 0 && y < @grid.length && x >= 0 && x < @grid[0].length
+        points << new_point if @grid[y][x] == val
+      end
+    end
+    points
+  end
+
   def key_wait
     p "press any key"
     STDIN.getch
@@ -101,7 +113,7 @@ end
 # along with a hash of all available scores for each point in scores
 def lowest_score scores, points
   lowest_score = 9999999
-  low = nil
+  low = [points[0],scores[points[0]]]
   points.each do |point|
     if scores[point] < lowest_score
       low = [point,scores[point]]
@@ -129,7 +141,7 @@ def get_neighbors point, path
   raise "You need to define how to get the neighbors of a point! What are the available next nodes?"
 end
 
-def score_for_neighbor point, neighbor
+def score_for_neighbor last, point, neighbor
   raise "You need to define how to score a neighbor! What is the cost of moving to a new node?"
 end
 
