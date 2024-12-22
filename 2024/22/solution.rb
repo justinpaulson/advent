@@ -51,4 +51,4 @@ possibles.each do |line, possible|
   end
 end
 
-puts possible_counts.max_by{|k,v| v}
+puts possible_counts.max_by{|k,v| v}.last
