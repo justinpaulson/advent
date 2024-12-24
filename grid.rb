@@ -35,16 +35,35 @@ class Grid
     end
   end
 
-  def print_grid joiner:"", highlight_cursor:nil, clear:true, wait:false
+  def print_grid joiner:"", highlight_cursor:nil, highlight_target:nil, highlight_path:nil, clear:true, wait:false, range:nil
     total = @grid.length.to_s.length
     puts `clear` if clear
-    0.upto(@grid.length-1) do |y|
+    range ||= 0..@grid.length-1
+    range.each do |y|
       print " " * (total - y.to_s.length) + y.to_s
       print " "
-      if highlight_cursor && highlight_cursor[0] == y
-        print @grid[y][0..(highlight_cursor[1]-1)].join(joiner) + "," unless highlight_cursor[1] == 0
-        print "\e[33m#{@grid[y][highlight_cursor[1]]}\e[0m"
-        puts ","+@grid[y][highlight_cursor[1]+1..-1].join(joiner) unless highlight_cursor[1] == @grid[y].length - 1
+      if highlight_cursor && highlight_target && highlight_cursor[0] == y && highlight_target[0] == y
+        if highlight_cursor[1] < highlight_target[1]
+          print @grid[y][0..(highlight_cursor[1]-1)].join(joiner) unless highlight_cursor[1] == 0
+          print "\e[32m#{@grid[y][highlight_cursor[1]]}\e[0m"
+          print @grid[y][highlight_cursor[1]+1..(highlight_target[1]-1)].join(joiner)
+          print "\e[31m#{@grid[y][highlight_target[1]]}\e[0m"
+          puts @grid[y][highlight_target[1]+1..-1].join(joiner) unless highlight_target[1] == @grid[y].length - 1
+        else
+          print @grid[y][0..(highlight_target[1]-1)].join(joiner) unless highlight_target[1] == 0
+          print "\e[31m#{@grid[y][highlight_target[1]]}\e[0m"
+          print @grid[y][highlight_target[1]+1..(highlight_cursor[1]-1)].join(joiner)
+          print "\e[32m#{@grid[y][highlight_cursor[1]]}\e[0m"
+          puts @grid[y][highlight_cursor[1]+1..-1].join(joiner) unless highlight_cursor[1] == @grid[y].length - 1
+        end
+      elsif highlight_cursor && highlight_cursor[0] == y
+        print @grid[y][0..(highlight_cursor[1]-1)].join(joiner) unless highlight_cursor[1] == 0
+        print "\e[32m#{@grid[y][highlight_cursor[1]]}\e[0m"
+        puts @grid[y][highlight_cursor[1]+1..-1].join(joiner) unless highlight_cursor[1] == @grid[y].length - 1
+      elsif highlight_target && highlight_target[0] == y
+        print @grid[y][0..(highlight_target[1]-1)].join(joiner) unless highlight_target[1] == 0
+        print "\e[31m#{@grid[y][highlight_target[1]]}\e[0m"
+        puts @grid[y][highlight_target[1]+1..-1].join(joiner) unless highlight_target[1] == @grid[y].length - 1
       else
         puts @grid[y].join(joiner)
       end
@@ -99,6 +118,14 @@ class Grid
     points
   end
 
+  def count val
+    count = 0
+    @grid.each do |line|
+      count += line.count(val)
+    end
+    count
+  end
+
   def key_wait
     p "press any key"
     STDIN.getch
@@ -141,12 +168,22 @@ def get_neighbors point, path
   raise "You need to define how to get the neighbors of a point! What are the available next nodes?"
 end
 
-def score_for_neighbor last, point, neighbor
-  raise "You need to define how to score a neighbor! What is the cost of moving to a new node?"
+@warned_score_for_neighbor = false
+def score_for_neighbor point, neighbor
+  if !@warned_score_for_neighbor
+    warn "WARNING: You did not define how to score a neighbor! Using a default of 1."
+    @warned_score_for_neighbor = true
+  end
+  1
 end
 
+@warned_h = false
 def h point, path
-  raise "You need to define the heuristic! How do you estimate the distance to the goal?"
+  if !@warned_h
+    warn "WARNING: You did not define a heuristic! Using a default of 1."
+    @warned_h = true
+  end
+  1
 end
 
 def print_a_star curr_point, lowest, neighbors, set, from, g, f
