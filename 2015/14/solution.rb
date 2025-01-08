@@ -1,8 +1,8 @@
-lines = File.readlines("input")
+ARGV[0] ||= "input"
+lines = File.readlines(ARGV[0])
 
 def total_flight time, deer
   speed, flight, rest, _ = deer[1]
-  puts deer
   distance = speed * flight
   total_time = rest + flight
   t = (time / total_time) * distance
@@ -31,19 +31,17 @@ end
 
 time = 2503
 
-t = 0
+ans1 = 0
 deer.each do |d|
   f = total_flight time, d
-  t = f if t < f
+  ans1 = f if ans1 < f
 end
+puts ans1
 
-1.upto(2503) do |time|
-  leaders_for_time(deer, time).each do |win|
+1.upto(time) do |t|
+  leaders_for_time(deer, t).each do |win|
     deer[win][3] += 1
   end
 end
-
-furthest = deer.sort_by{|k,v| v[3]}[0][1]
-
-puts deer.to_s
-puts furthest
+furthest = deer.sort_by{|k,v| v[3]}[-1][-1]
+puts furthest[-1]
