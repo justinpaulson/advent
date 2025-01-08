@@ -1,9 +1,9 @@
-lines = File.readlines("input")
+ARGV[0] ||= "input"
+lines = File.readlines(ARGV[0])
 
 def cookie_for toppings, vals
   totals = [0, 0, 0, 0]
   toppings.each_with_index do |top, i|
-    # puts top.to_s
     top[1][0..-2].each_with_index do |top_val, ind|
       totals[ind] += (top_val * vals[i])
     end
