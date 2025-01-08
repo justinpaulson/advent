@@ -1,4 +1,5 @@
-sues = IO.readlines("input").map{|l| l.chomp.split(/[0-9]: /)[1].split(", ").map{|attr| attr.split(": ").each_with_index.map{|a, i| i == 0 ? a : a.to_i}}.to_h}
+ARGV[0] ||= "input"
+sues = IO.readlines(ARGV[0]).map{|l| l.chomp.split(/[0-9]: /)[1].split(", ").map{|attr| attr.split(": ").each_with_index.map{|a, i| i == 0 ? a : a.to_i}}.to_h}
 
 sue = {
   "children" => 3,
