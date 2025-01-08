@@ -1,8 +1,7 @@
 load "../../grid.rb"
+ARGV[0] ||= "input"
 
-grid = IO.readlines("input").map{|l| l.chomp.chars}
-
-print_grid grid
+grid = Grid.new(IO.readlines(ARGV[0]).map(&:chomp))
 
 def count_neighbors grid, y, x
   t = 0
@@ -29,26 +28,37 @@ def set_light grid, y, x
   out
 end
 
-steps = 100
-
-grid[0][0] = '#'
-grid[0][99] = '#'
-grid[99][99] = '#'
-grid[99][0] = '#'
-
-while steps > 0
-  steps -= 1
-  n_grid = new_grid 100, 100, "."
+100.times do
+  n_grid = Grid.new(100, 100, ".")
   0.upto(99) do |y|
     0.upto(99) do |x|
-      n_grid[y][x] = set_light grid, y, x
+      n_grid.grid[y][x] = set_light grid.grid, y, x
     end
   end
   grid = n_grid
-  grid[0][0] = '#'
-  grid[0][99] = '#'
-  grid[99][99] = '#'
-  grid[99][0] = '#'
 end
 
-p grid.sum{|l| l.count("#")}
+p grid.grid.sum{|l| l.count("#")}
+
+grid = Grid.new(IO.readlines(ARGV[0]).map(&:chomp))
+
+grid.grid[0][0] = '#'
+grid.grid[0][99] = '#'
+grid.grid[99][99] = '#'
+grid.grid[99][0] = '#'
+
+100.times do
+  n_grid = Grid.new(100, 100, ".")
+  0.upto(99) do |y|
+    0.upto(99) do |x|
+      n_grid.grid[y][x] = set_light grid.grid, y, x
+    end
+  end
+  grid = n_grid
+  grid.grid[0][0] = '#'
+  grid.grid[0][99] = '#'
+  grid.grid[99][99] = '#'
+  grid.grid[99][0] = '#'
+end
+
+p grid.grid.sum{|l| l.count("#")}
