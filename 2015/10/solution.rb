@@ -1,10 +1,8 @@
-input1 = "1113222113"
+ARGV[0] ||= "input"
+input1 = File.read(ARGV[0]).strip
 
-
-# too big: "5712667"
-# too big: "5712665"
-# too big: "3659708"
-
+# Sloooooow takes around 30 minutes or more to run
+# need to look into a solution that updates the pieces in groups
 50.times do |i|
   new_input = ""
   l = nil
@@ -23,7 +21,9 @@ input1 = "1113222113"
   new_input += t.to_s
   new_input += l
   input1 = new_input
-  puts i
+  if i == 39
+    puts input1.length
+  end
 end
 
 puts input1.length
