@@ -1,6 +1,8 @@
-p File.read("input").scan(/[0-9]+|-[0-9]+/).sum(&:to_i)
+ARGV[0] ||= "input"
 
-input = File.read("input")
+p File.read(ARGV[0]).scan(/[0-9]+|-[0-9]+/).sum(&:to_i)
+
+input = File.read(ARGV[0])
 
 while next_red = input.index(":\"red\"")
   right_total = 0
@@ -28,15 +30,3 @@ while next_red = input.index(":\"red\"")
 end
 
 p input.scan(/[0-9]+|-[0-9]+/).sum(&:to_i)
-
-# first_phase = File.read("input").gsub(/(\[[^\{\}]+\])/){|arr| arr.scan(/[0-9]+|-[0-9]+/).sum(&:to_i).to_s}
-# first_phase = first_phase.gsub(/\{[^\{\[]*red[^\}\]]*\}/, ".").scan(/[0-9]+|-[0-9]+/).sum(&:to_i)
-
-# puts first_phase
-
-# 54661 : too low
-
-# 69112 : close
-# 78257 : close
-
-# 96260 : too high
