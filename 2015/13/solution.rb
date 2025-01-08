@@ -1,4 +1,5 @@
-lines = File.readlines("input")
+ARGV[0] ||= "input"
+lines = File.readlines(ARGV[0]).map(&:chomp)
 
 def total_list guests, list
   list.each_with_index.map do |guest, i|
@@ -31,8 +32,6 @@ all_guests = guests.keys
 guests["me"] = {}
 
 all_guests.each{|g| guests["me"][g]=0; guests[g]["me"]=0}
-
-puts t_list.to_s
 
 t1 = 0
 
