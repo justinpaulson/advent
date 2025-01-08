@@ -1,4 +1,5 @@
-password = "cqjxjnds"
+ARGV[0] ||= "input"
+password = File.read(ARGV[0]).strip
 
 def has_straight password
   ords = password.chars.map(&:ord)
