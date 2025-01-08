@@ -1,4 +1,5 @@
-conts = IO.readlines("input").map(&:to_i).sort
+ARGV[0] ||= "input"
+conts = IO.readlines(ARGV[0]).map(&:to_i).sort
 
 total = 150
 wins = []
