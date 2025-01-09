@@ -1,16 +1,17 @@
 require '../../grid.rb'
+ARGV[0] ||= "input"
+boss_stats = File.readlines(ARGV[0]).map{ |line| line.split(": ")[1].to_i }
+
 @wizard = { hp: 50, mana: 500, armor: 0 }
-@boss = { hp: 51, damage: 9 }
+@boss = { hp: boss_stats[0], damage: boss_stats[1] }
 
 # test_1
 if ARGV[0] == "test1"
   @wizard = { hp: 10, mana: 250, armor: 0 }
-  @boss = { hp: 13, damage: 8 }
 end
 
 if ARGV[0] == "test2"
   @wizard = { hp: 10, mana: 250, armor: 0 }
-  @boss = { hp: 14, damage: 8 }
 end
 
 # [[3,0], {:hp=>-14, :mana=>656, :armor=>0}, {:hp=>8, :damage=>8}]=>402
@@ -77,7 +78,7 @@ def is_goal? point
   point[2][:hp] <= 0 && point[1][:hp] > 0
 end
 
-def get_neighbors point, path
+def get_neighbors point
   curr_path = point[0]
   curr_wizard = point[1]
   curr_boss = point[2]
@@ -135,20 +136,13 @@ def print_a_star curr_point, lowest, neighbors, set, from, g, f
   # key_wait
 end
 
-
+# bit slow, could speed up the a* probably
 @hard = false
 start = [[], @wizard.clone, @boss.clone]
-p a_star(start).last
+p a_star(start, h_path: false, neighbors_path: false).last
 
-#part 2, hard mode!
 @wizard[:hp] -= 1
 @hard = true
 
 start = [[], @wizard.clone, @boss.clone]
-p a_star(start).last
-
-# puts apply_path([4, 2, 1, 3, 0]).to_s
-
-
-# too low
-# 900
+p a_star(start, h_path: false, neighbors_path: false).last
