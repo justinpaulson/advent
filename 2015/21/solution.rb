@@ -1,4 +1,7 @@
-boss = { hp: 103, damage: 9, armor: 2 }
+ARGV[0] ||= "input"
+boss_stats = File.readlines(ARGV[0]).map{ |line| line.split(": ")[1].to_i }
+
+boss = { hp: boss_stats[0], damage: boss_stats[1], armor: boss_stats[2] }
 
 me = { hp: 100, damage: 0, armor: 0}
 
