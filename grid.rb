@@ -118,6 +118,18 @@ class Grid
     points
   end
 
+  def find_all_eight_adjacent point, val
+    points = []
+    y,x = point
+    [[y+1,x],[y-1,x],[y,x+1],[y,x-1],[y+1,x+1],[y+1,x-1],[y-1,x+1],[y-1,x-1]].each do |new_point|
+      y,x = new_point
+      if y >= 0 && y < @grid.length && x >= 0 && x < @grid[0].length
+        points << new_point if @grid[y][x] == val
+      end
+    end
+    points
+  end
+
   def count val
     count = 0
     @grid.each do |line|
@@ -161,17 +173,21 @@ def reconstruct_path from, current
 end
 
 def is_goal? point
-  raise "You need to define the goal! How does a point achieve the goal?"
+  raise "You need to define the goal! How does a point achieve the goal?\n\n   def is_goal? point\n\n"
 end
 
 def get_neighbors point, path
-  raise "You need to define how to get the neighbors of a point! What are the available next nodes?"
+  raise "You need to define how to get the neighbors of a point! What are the available next nodes?\n\n    def get_neighbors point, path\n\n"
+end
+
+def get_neighbors point
+  raise "You need to define how to get the neighbors of a point! What are the available next nodes?\n\n    def get_neighbors point, path\n\n"
 end
 
 @warned_score_for_neighbor = false
 def score_for_neighbor point, neighbor
   if !@warned_score_for_neighbor
-    warn "WARNING: You did not define how to score a neighbor! Using a default of 1."
+    warn "WARNING: You did not define how to score a neighbor! Using a default of 1.\n\n    def score_for_neighbor point, neighbor\n\n"
     @warned_score_for_neighbor = true
   end
   1
@@ -180,7 +196,15 @@ end
 @warned_h = false
 def h point, path
   if !@warned_h
-    warn "WARNING: You did not define a heuristic! Using a default of 1."
+    warn "WARNING: You did not define a heuristic! Using a default of 1.\n\n    def h point, path\n\n"
+    @warned_h = true
+  end
+  1
+end
+
+def h point
+  if !@warned_h
+    warn "WARNING: You did not define a heuristic! Using a default of 1.\n\n    def h point\n\n"
     @warned_h = true
   end
   1
@@ -215,7 +239,7 @@ def has_path? start, target
   return false
 end
 
-def a_star start
+def a_star start, h_path: true, neighbors_path: true
   set = [start]
   from = {}
 
@@ -223,30 +247,37 @@ def a_star start
   g[start] = 0
 
   f = {}
-  f[start] = h(start, [start])
+  if h_path
+    f[start] = h(start, [start])
+  else
+    f[start] = h(start)
+  end
 
   while set.length > 0
     curr_point, lowest = lowest_score f, set
-
     return [reconstruct_path(from,curr_point), g[curr_point]] if is_goal?(curr_point)
-
     set -= [curr_point]
 
     last = from[curr_point]
 
     neighbors = []
-
-    neighbors = get_neighbors(curr_point, reconstruct_path(from, curr_point))
-
+    if neighbors_path
+      neighbors = get_neighbors(curr_point, reconstruct_path(from, curr_point))
+    else
+      neighbors = get_neighbors(curr_point)
+    end
     neighbors.each do |new_point|
       tent_g = g[curr_point]
-
       tent_g += score_for_neighbor(curr_point, new_point)
 
-      if !g.keys.include?(new_point) || tent_g < g[new_point]
+      if !g[new_point] || tent_g < g[new_point]
         from[new_point] = curr_point
         g[new_point] = tent_g
-        f[new_point] = tent_g + h(new_point, reconstruct_path(from, new_point))
+        if h_path
+          f[new_point] = tent_g + h(new_point, reconstruct_path(from, new_point))
+        else
+          f[new_point] = tent_g + h(new_point)
+        end
         set << new_point if !set.include?(new_point)
       end
     end
