@@ -106,6 +106,18 @@ class Grid
     nil
   end
 
+  def find_all val
+    points = []
+    grid.each_with_index do |line, y|
+      line.each_with_index do |char, x|
+        if char == val
+          points << [y,x]
+        end
+      end
+    end
+    points
+  end
+
   def find_adjacent point, val
     points = []
     y,x = point
