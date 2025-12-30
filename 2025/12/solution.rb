@@ -10,6 +10,9 @@ tests.split("\n").each do |test|
   size = size.split("x").map(&:to_i).reduce(:*)
   counts = counts.split(" ").map(&:to_i)
 
+  # Very input specific here to create the counts.
+  # this is not a general solution, but we are here for stars!
+
   total = 0
   total += [counts[0], counts[1]].min * 15
   total += [counts[0], counts[1]].minmax.reduce(:- ) * -9
